@@ -170,12 +170,18 @@ async function loadHistory(range){
         const values=s.values||[];
 
         const topicIndex=columns.indexOf('topic');
-        const valueIndex=columns.indexOf('value');
+const valueIndex=columns.indexOf('value');
 
-        if(topicIndex<0 || valueIndex<0)return;
+if(valueIndex<0)return;
+
+const seriesTopic=String(
+  (s.tags && s.tags.topic) || ''
+).toLowerCase();
 
         values.forEach(row=>{
-          const topic=String(row[topicIndex]||'').toLowerCase();
+          const topic=seriesTopic || String(
+  row[topicIndex]||''
+).toLowerCase();
           const value=Number(row[valueIndex]);
 
           if(!Number.isFinite(value))return;
