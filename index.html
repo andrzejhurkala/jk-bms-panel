@@ -192,7 +192,8 @@ if(topic.includes('moc/state')){
   hist[n].p.push(value);
 }
 
-if(topic.includes('na__adowanie/state') || topic.includes('na__adowanie')){
+if(topic.includes('adowanie')){
+  console.log('SOC TOPIC:', topic, value);
   hist[n].s.push(value);
 }
           if(topic.includes('pr__d/state')){
