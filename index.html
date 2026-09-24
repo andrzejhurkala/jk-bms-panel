@@ -35,14 +35,18 @@ const ROOT='jk-bms-esp32/',WS='wss://da7ae258912c4d2786534e1112b08ee1.s1.eu.hive
 const $=x=>document.getElementById(x);function f(x,d=2){x=Number(x);return Number.isFinite(x)?x.toFixed(d):'--'}
 for(let n=1;n<3;n++){for(let i=1;i<9;i++)$('cells'+n).insertAdjacentHTML('beforeend',`<div class="cell"><small>OGNIWO ${i}</small><b id="cell${n}_${i}">-- V</b></div>`)}
 function connectMQTT(){let u=$('user').value,p=$('pass').value;if(!p)return $('err').textContent='Wpisz hasło.';client=mqtt.connect(WS,{username:u,password:p,clientId:'jkweb_'+Math.random().toString(16).slice(2),reconnectPeriod:3000});client.on('connect',()=>{ $('login').classList.add('hidden');$('panel').classList.remove('hidden');$('status').textContent='● Połączony';$('status').className='online';client.subscribe(ROOT+'#')});client.on('reconnect',()=>$('status').textContent='● Łączenie…');client.on('close',()=>{$('status').textContent='● Rozłączony';$('status').className=''});client.on('error',()=>$('err').textContent='Błąd połączenia – sprawdź dane logowania.');client.on('message',(t,m)=>msg(t,m.toString()))}
-function msg(t,v){let s=t.toLowerCase(),n=s.includes('bms_1_')?1:s.includes('bms_2_')?2:0;if(!n)return;let x=Number(v),m=s.match(/cela[_]?([1-8])\/state$/);
+function msg(t,v){
+let s=t.toLowerCase(),n=s.includes('bms_1_')?1:s.includes('bms_2_')?2:0;
+if(!n)return;
+let x=Number(v),m=s.match(/cela[_]?([1-8])\/state$/);
 if(m){$('cell'+n+'_'+m[1]).textContent=f(x,3)+' V';return}
 if(s.includes('temperatura_mosfet'))$('t'+n).textContent=f(x,1)+' °C';
-else if(s.includes('delta'))$('d'+n).textContent=f(x,3)+' V';
 else if(s.includes('rednie_napi')||s.includes('średnie_napi'))$('a'+n).textContent=f(x,3)+' V';
+else if(s.includes('r__nica_napi')||s.includes('roznica_napi')||s.includes('delta'))$('d'+n).textContent=f(x,3)+' V';
+else if(s.includes('napi__cie')||s.includes('napiecie'))$('v'+n).textContent=f(x,3)+' V';
 else if(s.includes('pr__d')||s.includes('prad'))$('i'+n).textContent=f(x,2)+' A';
 else if(s.includes('moc')){data[n].p=x;$('p'+n).textContent=f(x,1)+' W';$('total').textContent=f((data[1].p||0)+(data[2].p||0),1)+' W'}
-else if(s.includes('na__adowanie')||s.includes('naladowanie')||s.includes('soc')){let p=Math.max(0,Math.min(100,x));$('soc'+n).textContent=Math.round(p)+'%';$('g'+n).style.strokeDashoffset=220-220*p/100}
+else if(s.includes('na__adowanie')||s.includes('naladowanie')||s.includes('n__adowanie')||s.includes('soc')){let p=Math.max(0,Math.min(100,x));$('soc'+n).textContent=Math.round(p)+'%';$('g'+n).style.strokeDashoffset=220-220*p/100}
 else if(s.includes('online/state')){$('on'+n).textContent=String(v).toUpperCase()=='ON'?'ONLINE':'OFFLINE';$('on'+n).className=String(v).toUpperCase()=='ON'?'online':''}
 else if(s.includes('___adowanie/state')||s.includes('adowanie/state'))btn(n,'charge',v);
 else if(s.includes('roz__adowanie/state'))btn(n,'discharge',v);
