@@ -52,6 +52,13 @@ canvas{display:block;width:100%;height:190px;background:#0b121a;border-radius:10
 <div class="toggle"><label>⚖️ BALANSOWANIE <input id="b2" type="checkbox" onchange="cmd(2,'balance')"><span class="slider"></span></label><span id="bs2" class="state">OFF</span></div>
 </div><div class="cells" id="cells2"></div></div></div>
 <section class="charts">
+<div class="card" style="margin-top:18px;text-align:center">
+  <h2>📊 HISTORIA</h2>
+  <button onclick="loadHistory('24h')">24 GODZ.</button>
+  <button onclick="loadHistory('7d')">7 DNI</button>
+  <button onclick="loadHistory('30d')">30 DNI</button>
+  <span id="historyStatus" style="margin-left:12px;color:#91a0b3"></span>
+</div>
 <div class="card chart-card"><h2>📈 MAGAZYN 1 — HISTORIA</h2>
 <div class="chart-title">Napięcie [V]</div><canvas id="chartV1" width="560" height="190"></canvas>
 <div class="chart-title">Prąd [A]</div><canvas id="chartI1" width="560" height="190"></canvas></div>
