@@ -155,10 +155,14 @@ async function loadHistory(range){
 
     const json=await response.json();
 
-    hist[1].v=[];
-    hist[1].i=[];
-    hist[2].v=[];
-    hist[2].i=[];
+   hist[1].v=[];
+   hist[1].i=[];
+   hist[1].p=[];
+   hist[1].s=[];
+   hist[2].v=[];
+   hist[2].i=[];
+   hist[2].p=[];
+   hist[2].s=[];
 
     const results=json.results||[];
 
@@ -188,7 +192,13 @@ async function loadHistory(range){
           if(topic.includes('napi__cie/state')){
             hist[n].v.push(value);
           }
+if(topic.includes('moc/state')){
+  hist[n].p.push(value);
+}
 
+if(topic.includes('na__adowanie/state')){
+  hist[n].s.push(value);
+}
           if(topic.includes('pr__d/state')){
             hist[n].i.push(value);
           }
@@ -196,11 +206,15 @@ async function loadHistory(range){
       });
     });
 
-    drawChart('chartV1',hist[1].v,'v');
-    drawChart('chartI1',hist[1].i,'i');
-    drawChart('chartV2',hist[2].v,'v');
-    drawChart('chartI2',hist[2].i,'i');
+   drawChart('chartV1',hist[1].v,'v');
+   drawChart('chartI1',hist[1].i,'i');
+   drawChart('chartP1',hist[1].p,'p');
+   drawChart('chartS1',hist[1].s,'s');
 
+   drawChart('chartV2',hist[2].v,'v');
+   drawChart('chartI2',hist[2].i,'i');
+   drawChart('chartP2',hist[2].p,'p');
+   drawChart('chartS2',hist[2].s,'s');
     $('historyStatus').textContent=
       '✅ '+range+
       ' | BMS1: '+hist[1].v.length+
