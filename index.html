@@ -134,9 +134,57 @@ async function loadHistory(range){
 
     const json=await response.json();
 
-    console.log('HISTORIA:',json);
+    hist[1].v=[];
+    hist[1].i=[];
+    hist[2].v=[];
+    hist[2].i=[];
 
-    $('historyStatus').textContent='✅ '+range;
+    const results=json.results||[];
+
+    results.forEach(result=>{
+      const series=result.series||[];
+
+      series.forEach(s=>{
+        const columns=s.columns||[];
+        const values=s.values||[];
+
+        const topicIndex=columns.indexOf('topic');
+        const valueIndex=columns.indexOf('value');
+
+        if(topicIndex<0 || valueIndex<0)return;
+
+        values.forEach(row=>{
+          const topic=String(row[topicIndex]||'').toLowerCase();
+          const value=Number(row[valueIndex]);
+
+          if(!Number.isFinite(value))return;
+
+          const n=topic.includes('bms_1_')?1:
+                  topic.includes('bms_2_')?2:0;
+
+          if(!n)return;
+
+          if(topic.includes('napi__cie/state')){
+            hist[n].v.push(value);
+          }
+
+          if(topic.includes('pr__d/state')){
+            hist[n].i.push(value);
+          }
+        });
+      });
+    });
+
+    drawChart('chartV1',hist[1].v,'v');
+    drawChart('chartI1',hist[1].i,'i');
+    drawChart('chartV2',hist[2].v,'v');
+    drawChart('chartI2',hist[2].i,'i');
+
+    $('historyStatus').textContent=
+      '✅ '+range+
+      ' | BMS1: '+hist[1].v.length+
+      ' | BMS2: '+hist[2].v.length;
+
   }catch(e){
     console.error(e);
     $('historyStatus').textContent='❌ Błąd pobierania';
