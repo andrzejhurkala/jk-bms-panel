@@ -212,9 +212,15 @@ if(topic.includes('na__adowanie/state') || topic.includes('na__adowanie')){
    drawChart('chartP2',hist[2].p,'p');
    drawChart('chartS2',hist[2].s,'s');
     $('historyStatus').textContent=
-      '✅ '+range+
-      ' | BMS1: '+hist[1].v.length+
-      ' | BMS2: '+hist[2].v.length;
+  '✅ '+range+
+  ' | V1: '+hist[1].v.length+
+  ' | I1: '+hist[1].i.length+
+  ' | P1: '+hist[1].p.length+
+  ' | SOC1: '+hist[1].s.length+
+  ' | V2: '+hist[2].v.length+
+  ' | I2: '+hist[2].i.length+
+  ' | P2: '+hist[2].p.length+
+  ' | SOC2: '+hist[2].s.length;
 
   }catch(e){
     console.error(e);
