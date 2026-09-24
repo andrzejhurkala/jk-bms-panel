@@ -123,6 +123,25 @@ function msg(t,v){
 }
 
 const hist={1:{v:[],i:[]},2:{v:[],i:[]}};
+  const HISTORY_URL='https://bitter-cell-5e38.andrzejhurkala.workers.dev';
+
+async function loadHistory(range){
+  $('historyStatus').textContent='⏳ Pobieranie...';
+
+  try{
+    const response=await fetch(HISTORY_URL+'?range='+range);
+    if(!response.ok) throw new Error('HTTP '+response.status);
+
+    const json=await response.json();
+
+    console.log('HISTORIA:',json);
+
+    $('historyStatus').textContent='✅ '+range;
+  }catch(e){
+    console.error(e);
+    $('historyStatus').textContent='❌ Błąd pobierania';
+  }
+}
 function pushHist(n,k,x){
   if(!Number.isFinite(x))return;
   hist[n][k].push(x);
