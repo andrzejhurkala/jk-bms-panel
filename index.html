@@ -23,6 +23,10 @@ button{padding:10px 13px;border:0;border-radius:9px;background:#26384a;color:whi
 .toggle .state{min-width:24px;text-align:right;color:#91a0b3;font-size:10px}
 .toggle input:checked ~ .state{color:#49e58a}
 .status{color:#91a0b3;margin:12px 0}.online{color:#49e58a;font-weight:bold}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+.chart-card{overflow:hidden}.chart-title{color:#91a0b3;font-size:12px;margin:8px 0 3px}
+canvas{display:block;width:100%;height:190px;background:#0b121a;border-radius:10px;border:1px solid #202d3b}
+@media(max-width:850px){.charts{grid-template-columns:1fr}}
 .total{margin-top:18px}.err{color:#ff7885;margin-top:10px}.hidden{display:none}
 </style></head><body>
 <header><b>🔋 JK BMS – panel zdalny</b><span id="status">● Rozłączony</span></header>
@@ -47,6 +51,14 @@ button{padding:10px 13px;border:0;border-radius:9px;background:#26384a;color:whi
 <div class="toggle"><label>↕️ ROZŁADOWANIE <input id="r2" type="checkbox" onchange="cmd(2,'discharge')"><span class="slider"></span></label><span id="rs2" class="state">OFF</span></div>
 <div class="toggle"><label>⚖️ BALANSOWANIE <input id="b2" type="checkbox" onchange="cmd(2,'balance')"><span class="slider"></span></label><span id="bs2" class="state">OFF</span></div>
 </div><div class="cells" id="cells2"></div></div></div>
+<section class="charts">
+<div class="card chart-card"><h2>📈 MAGAZYN 1 — HISTORIA</h2>
+<div class="chart-title">Napięcie [V]</div><canvas id="chartV1" width="560" height="190"></canvas>
+<div class="chart-title">Prąd [A]</div><canvas id="chartI1" width="560" height="190"></canvas></div>
+<div class="card chart-card"><h2>📈 MAGAZYN 2 — HISTORIA</h2>
+<div class="chart-title">Napięcie [V]</div><canvas id="chartV2" width="560" height="190"></canvas>
+<div class="chart-title">Prąd [A]</div><canvas id="chartI2" width="560" height="190"></canvas></div>
+</section>
 <div class="card total"><h2>⚡ MAGAZYN ŁĄCZNIE</h2><b id="total">-- W</b></div></section></main>
 <script>
 const ROOT='jk-bms-esp32/',WS='wss://da7ae258912c4d2786534e1112b08ee1.s1.eu.hivemq.cloud:8884/mqtt';let client,data={1:{},2:{}};
@@ -74,12 +86,14 @@ function msg(t,v){
   }
   else if(s.includes('napi__cie/state')){
     $('v'+n).textContent=f(x,3)+' V';
+    pushHist(n,'v',x);
   }
   else if(s.includes('___rednie_napi__cie_celi/state') || s.includes('rednie_napi')){
     $('a'+n).textContent=f(x,3)+' V';
   }
   else if(s.includes('pr__d/state')){
     $('i'+n).textContent=f(x,2)+' A';
+    pushHist(n,'i',x);
   }
   else if(s.includes('moc/state')){
     data[n].p=x;
@@ -99,6 +113,35 @@ function msg(t,v){
   else if(s.includes('/switch/bms_'+n+'___adowanie/state')) setSwitch(n,'charge',v);
   else if(s.includes('/switch/bms_'+n+'_roz__adowanie/state')) setSwitch(n,'discharge',v);
   else if(s.includes('/switch/bms_'+n+'_balansowanie/state')) setSwitch(n,'balance',v);
+}
+
+const hist={1:{v:[],i:[]},2:{v:[],i:[]}};
+function pushHist(n,k,x){
+  if(!Number.isFinite(x))return;
+  hist[n][k].push(x);
+  if(hist[n][k].length>60)hist[n][k].shift();
+  drawChart('chart'+(k==='v'?'V':'I')+n,hist[n][k],k);
+}
+function drawChart(id,a,k){
+  const c=$(id),ctx=c.getContext('2d'),w=c.width,h=c.height;
+  ctx.clearRect(0,0,w,h);
+  if(!a.length)return;
+  ctx.strokeStyle='#263746';ctx.lineWidth=1;
+  for(let j=1;j<5;j++){let y=j*h/5;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
+  let min=Math.min(...a),max=Math.max(...a);
+  if(min===max){min-=1;max+=1}
+  const pad=14,range=max-min;
+  min-=range*.12;max+=range*.12;
+  ctx.strokeStyle=k==='v'?'#49a7ff':'#49e58a';ctx.lineWidth=2.5;ctx.beginPath();
+  a.forEach((val,idx)=>{
+    const x=pad+(idx/Math.max(1,a.length-1))*(w-2*pad);
+    const y=h-pad-(val-min)/(max-min)*(h-2*pad);
+    if(idx===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  ctx.fillStyle='#91a0b3';ctx.font='12px Arial';
+  ctx.fillText(max.toFixed(k==='v'?2:1),8,14);
+  ctx.fillText(min.toFixed(k==='v'?2:1),8,h-5);
 }
 
 function setSwitch(n,k,v){
