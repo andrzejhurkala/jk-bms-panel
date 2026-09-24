@@ -140,7 +140,10 @@ function msg(t,v){
   else if(s.includes('/switch/bms_'+n+'_balansowanie/state')) setSwitch(n,'balance',v);
 }
 
-const hist={1:{v:[],i:[]},2:{v:[],i:[]}};
+const hist={
+  1:{v:[],i:[],p:[],s:[]},
+  2:{v:[],i:[],p:[],s:[]}
+};
   const HISTORY_URL='https://bitter-cell-5e38.andrzejhurkala.workers.dev';
 
 async function loadHistory(range){
